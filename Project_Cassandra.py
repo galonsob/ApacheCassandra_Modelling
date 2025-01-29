@@ -153,19 +153,18 @@ for row in rows:
 ## need to include the itemInSession for the sorting requested
 
 query = "CREATE TABLE IF NOT EXISTS Sessions_Artists"
-query = query + "(userId int, sessionId int,artist varchar, song_title varchar, user varchar, itemInSession int, PRIMARY KEY (userId, sessionId, itemInSession))"
+query = query + "(userId int, sessionId int, itemInSession int, artist varchar, song_title varchar, user varchar, PRIMARY KEY (userId, sessionId, itemInSession))"
 try:
     session.execute(query)
 except Exception as e:
-    print(e)     
-                    
+    print(e)         
                     
 # #### We carry out the data insertion required iterating over the dataframe
 
 for row in clean_data.itertuples(index=False):
-    query = "INSERT INTO Sessions_Artists(userId, sessionId, artist, song_title, user, itemInSession)"
+    query = "INSERT INTO Sessions_Artists(userId, sessionId, itemInSession, artist, song_title, user)"
     query = query + "values(%s,%s,%s,%s,%s,%s)"
-    session.execute(query, (row.userId, row.sessionId, row.artist, row.song, row.User, row.itemInSession))
+    session.execute(query, (row.userId, row.sessionId, row.itemInSession, row.artist, row.song, row.User))
                     
                     
 # ####SELECT to verify that the data have been inserted into the table
@@ -181,24 +180,24 @@ for row in rows:
 
 # Query 3: Every user name (first and last) in my music app history who listened to the song 'All Hands Against His Own'
 ## Creation of the table User_Listens with a PK(song_title, artist) as those fields are needed for filtering and provide uniqueness,
-## song_title could have potentially not provided uniqueness on its own
+## due to the possibility of many users listening to the same song, without the ID you would only get the last user
 
 query = "CREATE TABLE IF NOT EXISTS User_Listens"
-query = query + "(song_title varchar, user varchar, artist varchar, PRIMARY KEY (song_title, artist))"
+query = query + "(song_title varchar, userId int, user varchar, artist varchar, PRIMARY KEY (song_title, userId))"
         
 try:
     session.execute(query)
 except Exception as e:
     print(e)     
-                    
+                  
 
 
 # #### We carry out the data insertion required iterating over the dataframe
 
 for row in clean_data.itertuples(index=False):
-    query = "INSERT INTO User_Listens(song_title, user, artist)"
-    query = query + "values(%s,%s,%s)"
-    session.execute(query, (row.song, row.User, row.artist))
+    query = "INSERT INTO User_Listens(song_title, userId, user, artist)"
+    query = query + "values(%s,%s,%s,%s)"
+    session.execute(query, (row.song, row.userId, row.User, row.artist))
 
 
 
